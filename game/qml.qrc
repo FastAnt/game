@@ -3,5 +3,6 @@
         <file>main.qml</file>
         <file>Metal_ball_body.png</file>
         <file>paper.jpg</file>
+        <file>Button_3-512.png</file>
     </qresource>
 </RCC>

@@ -10,7 +10,65 @@ QMap<int , QString> id_names = {
 
 physicalEngine::physicalEngine()
 {
+    setAcceptedMouseButtons(Qt::AllButtons);
+}
 
+void physicalEngine::mouseMoveEvent(QMouseEvent *event)
+{
+    if(isPress)
+    {
+        m_id_pointers[ m_currentId ]->m_x = event->pos().rx();
+        m_id_pointers[ m_currentId ]->m_y = event->pos().ry();
+        qDebug() << QPoint(event->pos());
+        m_id_pointers[ m_currentId ]->setPosition(QPoint(event->pos()));
+    }
+
+    //        moveTimer.setInterval(50);
+    //        moveTimer.start();
+}
+
+void physicalEngine::mousePressEvent(QMouseEvent *event)
+{
+
+    for(auto obj : this->parent()->findChildren<Ball*>())
+    {
+        if(obj->isUnderMouse())
+        {
+            m_currentId  =  obj->property("b_id").toInt();
+            isPress = true;
+            moveTimer.stop();
+            connect(&pushTimer, SIGNAL(timeout()), this, SLOT(savePos()));
+            pushTimer.setInterval(100);
+            pushTimer.start();
+        }
+    }
+
+
+    //        moveTimer.start();
+}
+
+void physicalEngine::mouseReleaseEvent(QMouseEvent *event)
+{
+    //moveTimer.stop();
+    isPress = false;
+    pushTimer.stop();
+    qDebug () << event->x() << " event->x()";
+    qDebug () << m_PrevX << " m_PrevX";
+    m_id_pointers[ m_currentId ]->m_cos = float((float(event->x() - m_PrevX))/sqrt(pow((event->x() - m_PrevX),2) + pow((event->y() - m_PrevY),2)));
+    qDebug() <<  (float(event->x() - m_PrevX)) << "  (float(event->x() - m_PrevX))";
+    qDebug() <<  m_id_pointers[ m_currentId ]->m_cos << "  COS";
+
+
+    m_id_pointers[ m_currentId ]->m_sin = float((event->y() - m_PrevY))/sqrt(pow((event->x() - m_PrevX),2) + pow((event->y() - m_PrevY),2));
+    qDebug() <<  float((event->y() - m_PrevY)) << "  float((event->y() - m_PrevY))";
+    qDebug() <<  m_id_pointers[ m_currentId ]->m_sin << "  SIN";;
+//    m_id_pointers[ m_currentId ]->m_velocity =  not true!!!!
+    m_id_pointers[ m_currentId ]->m_velocity = sqrt(pow((float( event->x() - m_PrevX)) * m_id_pointers[ m_currentId ]->m_cos/50,2)
+            +pow((float( event->y() - m_PrevY)) * m_id_pointers[ m_currentId ]->m_sin/50,2)) ;
+   //connect(&moveTimer, SIGNAL(timeout()), this, SLOT(moveAll()));
+     qDebug() <<  m_id_pointers[ m_currentId ]->m_velocity;
+   moveTimer.setInterval(20);
+   moveTimer.start();
 }
 
 int physicalEngine::calculateX(int id)
@@ -23,6 +81,18 @@ int physicalEngine::calculateY(int id)
     return  m_id_pointers[ id ]->m_y + m_id_pointers[ id ]->m_velocity*m_id_pointers[ id ]->m_sin;
 }
 
+int physicalEngine::calculateX(Ball * obj)
+{
+    obj->m_x += obj->m_velocity*obj->m_cos * 10;
+    return obj->m_x;
+}
+
+int physicalEngine::calculateY(Ball * obj)
+{
+    obj->m_y +=  obj->m_velocity*obj->m_sin * 10;
+    return obj->m_y;
+}
+
 
 void physicalEngine::moveItem(int id)
 {
@@ -31,6 +101,22 @@ void physicalEngine::moveItem(int id)
     if(  m_id_pointers[ id ]->m_velocity>=1)
         m_id_pointers[ id ]->m_velocity--;
 }
+void physicalEngine::moveItem(Ball * obj)
+{
+    obj->setX(calculateX(obj));
+    obj->setY(calculateY(obj));
+    if(obj->m_x>this->width()*2 || obj->m_x <= 0 )
+        obj->m_cos = - obj->m_cos;
+    if(obj->m_y>this->height()/2|| obj->m_y <= 0)
+        obj->m_sin = -obj->m_sin;
+    qDebug() << obj->m_velocity;
+    if(  obj->m_velocity>=0.05)
+        obj->m_velocity = obj->m_velocity/1.02;
+    else if(obj->m_velocity<=-0.05)
+       obj->m_velocity = obj->m_velocity/1.02;
+    else obj->m_velocity = 0;
+}
+
 
 void physicalEngine::initPointers()
 {
@@ -39,4 +125,21 @@ void physicalEngine::initPointers()
         if(parent()->findChild<Ball*>(elem))
             m_id_pointers[ id_names.key(elem)] = parent()->findChild<Ball*>(elem);
     }
+    //connect(&moveTimer,moveTimer.timeout(),this,moveAll());
+    connect(&moveTimer, SIGNAL(timeout()), this, SLOT(moveAll()));
+    moveTimer.setInterval(20);
+    moveTimer.start();
+}
+
+void physicalEngine::moveAll()
+{
+    for(auto elem : m_id_pointers)
+    {
+        moveItem(elem);
+    }
+}
+void physicalEngine::savePos()
+{
+    m_PrevX =  m_id_pointers[ m_currentId ]->m_x;
+    m_PrevY =  m_id_pointers[ m_currentId ]->m_y;
 }

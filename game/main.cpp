@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<Ball>("com.mycompany.ball", 1, 0, "Ball");
     qmlRegisterType<physicalEngine>("com.mycompany.PhysicalEngine", 1, 0, "PhysicalEngine");
     engine.load(QUrl(QLatin1String("qrc:/main.qml")));
-
+    app.setProperty("width",800);
+app.setProperty("height",400);
     return app.exec();
 }

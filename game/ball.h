@@ -3,45 +3,28 @@
 
 #include <QQuickItem>
 #include <QTimer>
+#include <QPoint>
+#include <QDebug>
 
 class Ball :public QQuickItem
 {
     Q_OBJECT
 public:
 
-    Ball() {}
+    Ball()
+    {
+        // setAcceptedMouseButtons(Qt::AllButtons);
+
+    }
     ~Ball(){}
-    double  m_sin;
-    double  m_cos;
-    double  m_velocity;
-    void mouseMoveEvent(QMouseEvent *event)
-    {
-        if(isPress)
-        {
-            m_x = event->x();
-            m_y = event->y();
-        }
+    double  m_sin = 0;
+    double  m_cos = 0;
+    double  m_velocity = 0;
 
-//        moveTimer.setInterval(50);
-//        moveTimer.start();
-    }
-    void mousePressEvent(QMouseEvent *event)
-    {
-          isPress = true;
-//        moveTimer.setInterval(50);
-//        moveTimer.start();
-    }
-    void mouseReleaseEvent(QMouseEvent *event)
-    {
-        //moveTimer.stop();
-        m_cos = (event->x() - m_x)/10;
-        m_sin = (event->y() - m_y)/10;
-        m_velocity = sqrt(m_cos*m_cos + m_sin*m_sin);
-        isPress = false;
-    }
-
-    int     m_x;
-    int     m_y;
+    int     m_x = 200;
+    int     m_y = 200;
+    Q_INVOKABLE void setStertX(int x) {m_x  =x;}
+    Q_INVOKABLE void setStartY(int y) {m_y = y;}
 
     QTimer moveTimer;
     bool isPress;
