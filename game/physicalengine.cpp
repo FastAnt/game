@@ -17,6 +17,23 @@ void physicalEngine::mouseMoveEvent(QMouseEvent *event)
 {
     if(isPress)
     {
+        if(event->pos().rx() > this->width() -  this->width()/20|| event->pos().rx() <= -2 )
+        {
+//            if(isInPocket(obj->m_x +obj->width()/2  , obj->m_y +obj->height()/2))
+//                obj->m_velocity = 0;
+//            qDebug() << obj->m_x << "   ----> exploution X  " ;
+//            obj->m_cos = - obj->m_cos;
+            return ;
+        }
+
+        if(event->pos().ry() > this->height() - this->height()/10|| event->pos().ry() <= -2)
+        {
+//            if(isInPocket(obj->m_x +obj->width()/2  , obj->m_y +obj->height()/2))
+//                obj->m_velocity = 0;
+//            qDebug() << obj->m_y << "   ----> exploution Y";
+//            obj->m_sin = -obj->m_sin;
+            return;
+        }
         m_id_pointers[ m_currentId ]->m_x = event->pos().rx();
         m_id_pointers[ m_currentId ]->m_y = event->pos().ry();
         qDebug() << QPoint(event->pos());
@@ -67,7 +84,7 @@ void physicalEngine::mouseReleaseEvent(QMouseEvent *event)
             +pow((float( event->y() - m_PrevY)) * m_id_pointers[ m_currentId ]->m_sin/50,2)) ;
    //connect(&moveTimer, SIGNAL(timeout()), this, SLOT(moveAll()));
      qDebug() <<  m_id_pointers[ m_currentId ]->m_velocity;
-   moveTimer.setInterval(20);
+   moveTimer.setInterval(30);
    moveTimer.start();
 }
 
@@ -83,13 +100,13 @@ int physicalEngine::calculateY(int id)
 
 int physicalEngine::calculateX(Ball * obj)
 {
-    obj->m_x += obj->m_velocity*obj->m_cos * 10;
+    obj->m_x += obj->m_velocity*obj->m_cos * 15;
     return obj->m_x;
 }
 
 int physicalEngine::calculateY(Ball * obj)
 {
-    obj->m_y +=  obj->m_velocity*obj->m_sin * 10;
+    obj->m_y +=  obj->m_velocity*obj->m_sin * 15;
     return obj->m_y;
 }
 
@@ -101,20 +118,64 @@ void physicalEngine::moveItem(int id)
     if(  m_id_pointers[ id ]->m_velocity>=1)
         m_id_pointers[ id ]->m_velocity--;
 }
+
+bool physicalEngine::isBorder(Ball * obj)
+{
+
+    if(obj->m_x>this->width() -  this->width()/20|| obj->m_x <= -2 )
+    {
+        if(isInPocket(obj->m_x +obj->width()/2  , obj->m_y +obj->height()/2))
+            obj->m_velocity = 0;
+        qDebug() << obj->m_x << "   ----> exploution X  " ;
+        obj->m_cos = - obj->m_cos;
+    }
+
+    if(obj->m_y>this->height() - this->height()/10|| obj->m_y <= -2)
+    {
+        if(isInPocket(obj->m_x +obj->width()/2  , obj->m_y +obj->height()/2))
+            obj->m_velocity = 0;
+        qDebug() << obj->m_y << "   ----> exploution Y";
+        obj->m_sin = -obj->m_sin;
+    }
+
+}
 void physicalEngine::moveItem(Ball * obj)
 {
     obj->setX(calculateX(obj));
     obj->setY(calculateY(obj));
-    if(obj->m_x>this->width()*2 || obj->m_x <= 0 )
-        obj->m_cos = - obj->m_cos;
-    if(obj->m_y>this->height()/2|| obj->m_y <= 0)
-        obj->m_sin = -obj->m_sin;
+    isBorder(obj);
     qDebug() << obj->m_velocity;
-    if(  obj->m_velocity>=0.05)
+    if(  obj->m_velocity>=0.01)
         obj->m_velocity = obj->m_velocity/1.02;
-    else if(obj->m_velocity<=-0.05)
+    else if(obj->m_velocity<=-0.01)
        obj->m_velocity = obj->m_velocity/1.02;
     else obj->m_velocity = 0;
+
+
+
+}
+
+bool physicalEngine::isInPocket(int x, int y)
+{
+    for(auto elem : m_Pockets_list)
+    {
+        qDebug () << elem->x() << "  " << elem->y();
+        qDebug() << x << "  " <<y;
+
+        if((elem->x() < x)&&(elem->x()+ elem->width() > x))
+        if((elem->y() < y)&&(elem->y()+ elem->height() > y))
+        {
+            emit(this->pocketEx(elem->x(),elem->y()));
+            return true;
+        }
+        if(elem->contains(QPointF(x,y)))
+        {
+            emit(this->pocketEx(elem->x(),elem->y()));
+            return true;
+        }
+
+    }
+    return false;
 }
 
 
@@ -125,10 +186,20 @@ void physicalEngine::initPointers()
         if(parent()->findChild<Ball*>(elem))
             m_id_pointers[ id_names.key(elem)] = parent()->findChild<Ball*>(elem);
     }
+
+    m_Pockets_list =  parent()->findChildren<Pocket*>();
     //connect(&moveTimer,moveTimer.timeout(),this,moveAll());
     connect(&moveTimer, SIGNAL(timeout()), this, SLOT(moveAll()));
-    moveTimer.setInterval(20);
+    moveTimer.setInterval(30);
     moveTimer.start();
+}
+
+void physicalEngine::toStartPos()
+{
+    m_id_pointers[ 0 ]->m_x = 200;
+    m_id_pointers[ 0 ]->m_y = 200;
+    m_id_pointers[ 0 ]->m_velocity = 0;
+    m_id_pointers[ 0 ]->setOpacity(1);
 }
 
 void physicalEngine::moveAll()

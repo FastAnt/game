@@ -3,16 +3,26 @@
 #include <QQuickItem>
 #include "ball.h"
 #include "physicalengine.h"
+#include <pocket.h>
+#include <QQuickView>
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    //QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
 
-    QQmlApplicationEngine engine;
-    qmlRegisterType<Ball>("com.mycompany.ball", 1, 0, "Ball");
-    qmlRegisterType<physicalEngine>("com.mycompany.PhysicalEngine", 1, 0, "PhysicalEngine");
-    engine.load(QUrl(QLatin1String("qrc:/main.qml")));
-    app.setProperty("width",800);
-app.setProperty("height",400);
+        QQmlApplicationEngine engine;
+    qmlRegisterType<Ball>("ball", 1, 0, "Ball");
+    qmlRegisterType<physicalEngine>("PhysicalEngine", 1, 0, "PhysicalEngine");
+    qmlRegisterType<Pocket>("Pocket", 1, 0, "Pocket");
+
+    //engine.load(QUrl(QLatin1String("qrc:/main.qml")));
+
+    QQuickView view;
+    view.setSource(QUrl(QLatin1String("qrc:/main.qml")));
+    view.setWidth(800);
+    view.setHeight(400);
+
+    view.show();
+
     return app.exec();
 }

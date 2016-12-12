@@ -4,7 +4,8 @@ CONFIG += c++11
 
 SOURCES += main.cpp \
     physicalengine.cpp \
-    ball.cpp
+    ball.cpp \
+    pocket.cpp
 
 RESOURCES += qml.qrc
 
@@ -18,4 +19,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     physicalengine.h \
-    ball.h
+    ball.h \
+    pocket.h

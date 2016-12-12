@@ -4,5 +4,9 @@
         <file>Metal_ball_body.png</file>
         <file>paper.jpg</file>
         <file>Button_3-512.png</file>
+        <file>table.gif</file>
+        <file>pool_table.jpg</file>
+        <file>bill_bal.png</file>
+        <file>coin.png</file>
     </qresource>
 </RCC>

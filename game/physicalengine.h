@@ -4,6 +4,7 @@
 #include <QQuickItem>
 #include "ball.h"
 #include <QTimer>
+#include <pocket.h>
 
 
 
@@ -22,7 +23,10 @@ public:
 
     void moveItem(int id);
     void moveItem(Ball * obj);
+    bool isInPocket(int x, int y);
+    bool isBorder(Ball * obj);
     Q_INVOKABLE void initPointers();
+    Q_INVOKABLE void toStartPos();
     int m_currentId;
     bool isPress = false;
 
@@ -35,7 +39,7 @@ public:
 
 
 signals:
-
+     void pocketEx(int pos_x,int pos_y);
 public slots:
 
     void moveAll();
@@ -43,6 +47,7 @@ public slots:
 
 private :
     QMap<int , Ball*> m_id_pointers;
+    QList<Pocket*> m_Pockets_list;
 };
 
 #endif // PHYSICALENGINE_H

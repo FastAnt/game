@@ -23,6 +23,8 @@ public:
 
     int     m_x = 200;
     int     m_y = 200;
+    int     m_m;
+    int     m_radius ;
     Q_INVOKABLE void setStertX(int x) {m_x  =x;}
     Q_INVOKABLE void setStartY(int y) {m_y = y;}
 
