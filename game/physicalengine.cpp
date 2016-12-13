@@ -35,11 +35,24 @@ void physicalEngine::mouseMoveEvent(QMouseEvent *event)
             return;
         }
 
-        double angle = asinf((m_id_pointers[ m_currentId ]->y() - event->pos().ry())/
-                           sqrt(pow(m_id_pointers[ m_currentId ]->y() - event->pos().ry(),2) +
-                                pow(m_id_pointers[ m_currentId ]->x() - event->pos().rx(),2)));
+        int x_projection = (m_id_pointers[ m_currentId ]->x() - event->pos().rx());
+        int y_projection = (m_id_pointers[ m_currentId ]->y() - event->pos().ry());
+        double angle = asinf((y_projection)/
+                           sqrt(pow(y_projection,2) +
+                                pow(x_projection,2)));
+        if(x_projection<0)
+            angle = 3.14 - angle;
+
+
+
+
+//        double angle = atan(y_projection/x_projection);
+//        if(x_projection < 0)
+//            angle = 3.14 - angle;
         m_cue_x = m_id_pointers[ m_currentId ]->x() + m_id_pointers[ m_currentId ]->m_radius - (m_cue->width()+30*cos(angle))/**cos(60)*/;
         m_cue_y = m_id_pointers[ m_currentId ]->y() + m_id_pointers[ m_currentId ]->m_radius - (m_cue->height()/3+30*sin(angle))/**sin(60)*/;
+        qDebug() << "angle in radians: " << angle;
+        qDebug() << "angle in graduses: "<< angle * 57;
         m_cue->setRotation(angle*57);
         m_cue->setX(m_cue_x);
         m_cue->setY(m_cue_y);
@@ -94,13 +107,12 @@ void physicalEngine::mouseReleaseEvent(QMouseEvent *event)
     m_id_pointers[ m_currentId ]->m_sin = float((event->y() - m_PrevY))/sqrt(pow((event->x() - m_PrevX),2) + pow((event->y() - m_PrevY),2));
     qDebug() <<  float((event->y() - m_PrevY)) << "  float((event->y() - m_PrevY))";
     qDebug() <<  m_id_pointers[ m_currentId ]->m_sin << "  SIN";;
-//    m_id_pointers[ m_currentId ]->m_velocity =  not true!!!!
+    //    m_id_pointers[ m_currentId ]->m_velocity =  not true!!!!
     m_id_pointers[ m_currentId ]->m_velocity = sqrt(pow((float( event->x() - m_PrevX)) * m_id_pointers[ m_currentId ]->m_cos/50,2)
             +pow((float( event->y() - m_PrevY)) * m_id_pointers[ m_currentId ]->m_sin/50,2)) ;
-   //connect(&moveTimer, SIGNAL(timeout()), this, SLOT(moveAll()));
      qDebug() <<  m_id_pointers[ m_currentId ]->m_velocity;
-   moveTimer.setInterval(30);
-   moveTimer.start();
+    moveTimer.setInterval(30);
+    moveTimer.start();
 }
 
 int physicalEngine::calculateX(int id)
@@ -141,7 +153,7 @@ bool physicalEngine::isBorder(Ball * obj)
     {
         if(isInPocket(obj->m_x +obj->width()/2  , obj->m_y +obj->height()/2))
             obj->m_velocity = 0;
-        qDebug() << obj->m_x << "   ----> exploution X  " ;
+        qDebug() << obj->m_x << "   ----> collision X  " ;
         obj->m_cos = - obj->m_cos;
     }
 
@@ -149,7 +161,7 @@ bool physicalEngine::isBorder(Ball * obj)
     {
         if(isInPocket(obj->m_x +obj->width()/2  , obj->m_y +obj->height()/2))
             obj->m_velocity = 0;
-        qDebug() << obj->m_y << "   ----> exploution Y";
+        qDebug() << obj->m_y << "   ----> collision Y";
         obj->m_sin = -obj->m_sin;
     }
 
@@ -178,9 +190,6 @@ void physicalEngine::moveItem(Ball * obj)
     else if(obj->m_velocity<=-0.01)
        obj->m_velocity = obj->m_velocity/1.02;
     else obj->m_velocity = 0;
-
-
-
 }
 
 bool physicalEngine::isInPocket(int x, int y)
