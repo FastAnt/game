@@ -8,5 +8,10 @@
         <file>pool_table.jpg</file>
         <file>bill_bal.png</file>
         <file>coin.png</file>
+        <file>cue.png</file>
+        <file>cue1.png</file>
+        <file>cue4.jpg</file>
+        <file>mycue.bmp</file>
+        <file>mycue.png</file>
     </qresource>
 </RCC>

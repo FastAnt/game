@@ -34,10 +34,24 @@ void physicalEngine::mouseMoveEvent(QMouseEvent *event)
 //            obj->m_sin = -obj->m_sin;
             return;
         }
-        m_id_pointers[ m_currentId ]->m_x = event->pos().rx();
-        m_id_pointers[ m_currentId ]->m_y = event->pos().ry();
-        qDebug() << QPoint(event->pos());
-        m_id_pointers[ m_currentId ]->setPosition(QPoint(event->pos()));
+
+        double angle = asinf((m_id_pointers[ m_currentId ]->y() - event->pos().ry())/
+                           sqrt(pow(m_id_pointers[ m_currentId ]->y() - event->pos().ry(),2) +
+                                pow(m_id_pointers[ m_currentId ]->x() - event->pos().rx(),2)));
+        m_cue_x = m_id_pointers[ m_currentId ]->x() + m_id_pointers[ m_currentId ]->m_radius - (m_cue->width()+30*cos(angle))/**cos(60)*/;
+        m_cue_y = m_id_pointers[ m_currentId ]->y() + m_id_pointers[ m_currentId ]->m_radius - (m_cue->height()/3+30*sin(angle))/**sin(60)*/;
+        m_cue->setRotation(angle*57);
+        m_cue->setX(m_cue_x);
+        m_cue->setY(m_cue_y);
+
+//        m_id_pointers[ m_currentId ]->m_x = event->pos().rx();
+//        m_id_pointers[ m_currentId ]->m_y = event->pos().ry();
+//        qDebug() << QPoint(event->pos());
+//        m_id_pointers[ m_currentId ]->setPosition(QPoint(event->pos()));
+
+
+
+
     }
 
     //        moveTimer.setInterval(50);
@@ -53,6 +67,7 @@ void physicalEngine::mousePressEvent(QMouseEvent *event)
         {
             m_currentId  =  obj->property("b_id").toInt();
             isPress = true;
+            showCue(obj);
             moveTimer.stop();
             connect(&pushTimer, SIGNAL(timeout()), this, SLOT(savePos()));
             pushTimer.setInterval(100);
@@ -139,6 +154,19 @@ bool physicalEngine::isBorder(Ball * obj)
     }
 
 }
+
+void physicalEngine::showCue(Ball * obj)
+{
+
+    m_cue_x = obj->x() + obj->m_radius - (m_cue->width()+30*cos(3.14))/**cos(60)*/;
+    m_cue_y = obj->y() + obj->m_radius - (m_cue->height()/3+30*sin(3.14))/**sin(60)*/;
+    m_cue->setRotation(3.14*57);
+    m_cue->setX(m_cue_x);
+    m_cue->setY(m_cue_y);
+    m_cue->setZ(2);
+    m_cue->setVisible(true);
+
+}
 void physicalEngine::moveItem(Ball * obj)
 {
     obj->setX(calculateX(obj));
@@ -184,10 +212,15 @@ void physicalEngine::initPointers()
     for(auto elem : id_names)
     {
         if(parent()->findChild<Ball*>(elem))
+        {
             m_id_pointers[ id_names.key(elem)] = parent()->findChild<Ball*>(elem);
+            parent()->findChild<Ball*>(elem)->m_radius = parent()->findChild<Ball*>(elem)->width()/2;
+            parent()->findChild<Ball*>(elem)->m_m = 1;
+        }
     }
 
     m_Pockets_list =  parent()->findChildren<Pocket*>();
+    m_cue =  parent()->findChild<QQuickItem*>("cue");
     //connect(&moveTimer,moveTimer.timeout(),this,moveAll());
     connect(&moveTimer, SIGNAL(timeout()), this, SLOT(moveAll()));
     moveTimer.setInterval(30);

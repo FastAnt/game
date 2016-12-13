@@ -30,7 +30,7 @@ Item
     {
         id:ball_gone
         NumberAnimation { target: first; property: "opacity"; from : 1 ;to: 0; duration: 300 }
-        NumberAnimation { target: first; property: "scale"; from : 1 ;to: 0.7; duration: 700 }
+        NumberAnimation { target: first; property: "scale"; from : 1 ;to: 0.4; duration: 300 }
         onStopped: {first.scale = 1 ; first.opacity = 1;main_game.toStartPos()}
     }
     ParallelAnimation
@@ -211,6 +211,19 @@ Item
                 height: 57
                 transformOrigin: Item.Center
                 rotation: -48
+            }
+            Image {
+                id: cue
+                objectName: "cue"
+                source: "mycue.png"
+                visible: false
+                z:1
+                x:0
+                y:0
+                width: 400
+                height: 10
+                rotation: 0
+                transformOrigin: Item.Right
             }
         }
 

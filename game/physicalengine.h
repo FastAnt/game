@@ -25,6 +25,8 @@ public:
     void moveItem(Ball * obj);
     bool isInPocket(int x, int y);
     bool isBorder(Ball * obj);
+    void showCue(Ball * obj);
+
     Q_INVOKABLE void initPointers();
     Q_INVOKABLE void toStartPos();
     int m_currentId;
@@ -48,6 +50,9 @@ public slots:
 private :
     QMap<int , Ball*> m_id_pointers;
     QList<Pocket*> m_Pockets_list;
+    QQuickItem *   m_cue;
+    int m_cue_x;
+    int m_cue_y;
 };
 
 #endif // PHYSICALENGINE_H
