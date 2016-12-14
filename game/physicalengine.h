@@ -16,6 +16,7 @@ public:
     void mouseMoveEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    void push(float cos, float sin, int x, int y);
     int  calculateX(int id);
     int  calculateY(int id);
     int  calculateX(Ball * obj);
@@ -53,6 +54,10 @@ private :
     QQuickItem *   m_cue;
     int m_cue_x;
     int m_cue_y;
+    int m_cueCurrDistance;
+    int m_cuePrevDistance;
+
+    bool isOutOfBall = false;
 };
 
 #endif // PHYSICALENGINE_H

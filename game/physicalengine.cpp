@@ -37,38 +37,46 @@ void physicalEngine::mouseMoveEvent(QMouseEvent *event)
 
         int x_projection = (m_id_pointers[ m_currentId ]->x() - event->pos().rx());
         int y_projection = (m_id_pointers[ m_currentId ]->y() - event->pos().ry());
+        float distance =  sqrt(pow(y_projection,2) +
+                             pow(x_projection,2));
         double angle = asinf((y_projection)/
-                           sqrt(pow(y_projection,2) +
-                                pow(x_projection,2)));
+                          distance);
+        m_cueCurrDistance = distance;
+
         if(x_projection<0)
             angle = 3.14 - angle;
 
+        if(distance > 60 )
+            isOutOfBall = true;
+        if(isOutOfBall)
+        {
+                      // position of ball                   // ofset to center of ball              // pos of mouse
+            m_cue_x = m_id_pointers[ m_currentId ]->x() + m_id_pointers[ m_currentId ]->m_radius - (m_cue->width()*1.03+distance*cos(angle))/**cos(60)*/;
+            m_cue_y = m_id_pointers[ m_currentId ]->y() + m_id_pointers[ m_currentId ]->m_radius - (m_cue->height()/2.5+distance*sin(angle))/**sin(60)*/;
+        }
+        else
+        {
+            // position of ball                   // ofset to center of ball              // start pos of mouse
+          m_cue_x = m_id_pointers[ m_currentId ]->x() + m_id_pointers[ m_currentId ]->m_radius - (m_cue->width()+60*cos(angle))/**cos(60)*/;
+          m_cue_y = m_id_pointers[ m_currentId ]->y() + m_id_pointers[ m_currentId ]->m_radius - (m_cue->height()/3+60*sin(angle))/**sin(60)*/;
+        }
 
-
-
-//        double angle = atan(y_projection/x_projection);
-//        if(x_projection < 0)
-//            angle = 3.14 - angle;
-        m_cue_x = m_id_pointers[ m_currentId ]->x() + m_id_pointers[ m_currentId ]->m_radius - (m_cue->width()+30*cos(angle))/**cos(60)*/;
-        m_cue_y = m_id_pointers[ m_currentId ]->y() + m_id_pointers[ m_currentId ]->m_radius - (m_cue->height()/3+30*sin(angle))/**sin(60)*/;
         qDebug() << "angle in radians: " << angle;
-        qDebug() << "angle in graduses: "<< angle * 57;
-        m_cue->setRotation(angle*57);
+        qDebug() << "angle in graduses: "<< angle * 57.2958;
+        m_cue->setRotation(angle*57.2958);
         m_cue->setX(m_cue_x);
         m_cue->setY(m_cue_y);
-
-//        m_id_pointers[ m_currentId ]->m_x = event->pos().rx();
-//        m_id_pointers[ m_currentId ]->m_y = event->pos().ry();
-//        qDebug() << QPoint(event->pos());
-//        m_id_pointers[ m_currentId ]->setPosition(QPoint(event->pos()));
-
-
+        if(distance < 15 && isOutOfBall)
+        {
+//            if(x_projection<0)
+//                angle = 3.14 - angle;
+            float _cos = cos(angle);
+            float _sin = sin(angle);
+            push(_cos,_sin,event->pos().rx(),event->pos().ry());
+        }
 
 
     }
-
-    //        moveTimer.setInterval(50);
-    //        moveTimer.start();
 }
 
 void physicalEngine::mousePressEvent(QMouseEvent *event)
@@ -78,6 +86,7 @@ void physicalEngine::mousePressEvent(QMouseEvent *event)
     {
         if(obj->isUnderMouse())
         {
+//            this->setProperty("cursorShape", Qt::BlankCursor);
             m_currentId  =  obj->property("b_id").toInt();
             isPress = true;
             showCue(obj);
@@ -95,24 +104,38 @@ void physicalEngine::mousePressEvent(QMouseEvent *event)
 void physicalEngine::mouseReleaseEvent(QMouseEvent *event)
 {
     //moveTimer.stop();
+//    isPress = false;
+//    pushTimer.stop();
+//    qDebug () << event->x() << " event->x()";
+//    qDebug () << m_PrevX << " m_PrevX";
+//    m_id_pointers[ m_currentId ]->m_cos = float((float(event->x() - m_PrevX))/sqrt(pow((event->x() - m_PrevX),2) + pow((event->y() - m_PrevY),2)));
+//    qDebug() <<  (float(event->x() - m_PrevX)) << "  (float(event->x() - m_PrevX))";
+//    qDebug() <<  m_id_pointers[ m_currentId ]->m_cos << "  COS";
+
+
+//    m_id_pointers[ m_currentId ]->m_sin = float((event->y() - m_PrevY))/sqrt(pow((event->x() - m_PrevX),2) + pow((event->y() - m_PrevY),2));
+//    qDebug() <<  float((event->y() - m_PrevY)) << "  float((event->y() - m_PrevY))";
+//    qDebug() <<  m_id_pointers[ m_currentId ]->m_sin << "  SIN";;
+//    //    m_id_pointers[ m_currentId ]->m_velocity =  not true!!!!
+//    m_id_pointers[ m_currentId ]->m_velocity = sqrt(pow((float( event->x() - m_PrevX)) * m_id_pointers[ m_currentId ]->m_cos/50,2)
+//            +pow((float( event->y() - m_PrevY)) * m_id_pointers[ m_currentId ]->m_sin/50,2)) ;
+//     qDebug() <<  m_id_pointers[ m_currentId ]->m_velocity;
+//    moveTimer.setInterval(30);
+//    moveTimer.start();
+}
+
+void physicalEngine::push(float cos, float sin, int x, int y)
+{
     isPress = false;
     pushTimer.stop();
-    qDebug () << event->x() << " event->x()";
-    qDebug () << m_PrevX << " m_PrevX";
-    m_id_pointers[ m_currentId ]->m_cos = float((float(event->x() - m_PrevX))/sqrt(pow((event->x() - m_PrevX),2) + pow((event->y() - m_PrevY),2)));
-    qDebug() <<  (float(event->x() - m_PrevX)) << "  (float(event->x() - m_PrevX))";
-    qDebug() <<  m_id_pointers[ m_currentId ]->m_cos << "  COS";
-
-
-    m_id_pointers[ m_currentId ]->m_sin = float((event->y() - m_PrevY))/sqrt(pow((event->x() - m_PrevX),2) + pow((event->y() - m_PrevY),2));
-    qDebug() <<  float((event->y() - m_PrevY)) << "  float((event->y() - m_PrevY))";
-    qDebug() <<  m_id_pointers[ m_currentId ]->m_sin << "  SIN";;
-    //    m_id_pointers[ m_currentId ]->m_velocity =  not true!!!!
-    m_id_pointers[ m_currentId ]->m_velocity = sqrt(pow((float( event->x() - m_PrevX)) * m_id_pointers[ m_currentId ]->m_cos/50,2)
-            +pow((float( event->y() - m_PrevY)) * m_id_pointers[ m_currentId ]->m_sin/50,2)) ;
+    m_id_pointers[ m_currentId ]->m_cos = cos;
+    m_id_pointers[ m_currentId ]->m_sin = sin;
+    m_id_pointers[ m_currentId ]->m_velocity = m_cuePrevDistance/30;
      qDebug() <<  m_id_pointers[ m_currentId ]->m_velocity;
     moveTimer.setInterval(30);
     moveTimer.start();
+    m_cue->setVisible(false);
+    isOutOfBall = false;
 }
 
 int physicalEngine::calculateX(int id)
@@ -170,9 +193,9 @@ bool physicalEngine::isBorder(Ball * obj)
 void physicalEngine::showCue(Ball * obj)
 {
 
-    m_cue_x = obj->x() + obj->m_radius - (m_cue->width()+30*cos(3.14))/**cos(60)*/;
-    m_cue_y = obj->y() + obj->m_radius - (m_cue->height()/3+30*sin(3.14))/**sin(60)*/;
-    m_cue->setRotation(3.14*57);
+    m_cue_x = obj->x() + obj->m_radius - (m_cue->width()+60*cos(3.14))/**cos(60)*/;
+    m_cue_y = obj->y() + obj->m_radius - (m_cue->height()/3+60*sin(3.14))/**sin(60)*/;
+    m_cue->setRotation(3.14*57.2958);
     m_cue->setX(m_cue_x);
     m_cue->setY(m_cue_y);
     m_cue->setZ(2);
@@ -255,4 +278,5 @@ void physicalEngine::savePos()
 {
     m_PrevX =  m_id_pointers[ m_currentId ]->m_x;
     m_PrevY =  m_id_pointers[ m_currentId ]->m_y;
+    m_cuePrevDistance =  m_cueCurrDistance;
 }
